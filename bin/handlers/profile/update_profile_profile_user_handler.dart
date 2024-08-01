@@ -3,11 +3,12 @@ import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
 import '../../customize/response.dart';
+import '../../helper/get_data_supabase/profile/get_profile_Supervisor_database.dart';
+import '../../helper/get_data_supabase/profile/get_profile_user_database.dart';
 import '../../helper/token.dart';
 import '../../helper/upload_to_supabase/upload/upload_image.dart';
 import '../../integration/supabase/supabase_integration.dart';
 import '../../models/users/update_profile.dart';
-import '../../models/users/user_deltals.dart';
 
 updateProfileUserHandler(Request req) async {
   try {
@@ -66,54 +67,12 @@ updateProfileUserHandler(Request req) async {
 
       return ResponseClass()
           .succeedResponse(message: "success", data: userProfile.toJson());
-    } else {}
+    }
     final userProfile = await getProfileUserDataBase(id: user.idDataBase);
 
     return ResponseClass()
         .succeedResponse(message: "success", data: userProfile.toJson());
   } catch (error) {
     return CatchTheError(error: error).errorMessage();
-  }
-}
-
-Future<UserDetails> getProfileUserDataBase({required String id}) async {
-  try {
-    final userProfile = await SupabaseIntegration.supabase
-        ?.from('users')
-        .select("*,user_account(*)")
-        .eq("id", id)
-        .single();
-
-    final project = await SupabaseIntegration.supabase
-        ?.from('projects')
-        .select(
-            "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
-        .eq("user_id", id);
-    userProfile!["projects"] = project;
-
-    return UserDetails.fromJson(userProfile);
-  } catch (error) {
-    throw FormatException(error.toString());
-  }
-}
-
-Future<UserDetails> getProfileSupervisorDataBase({required String id}) async {
-  try {
-    final userProfile = await SupabaseIntegration.supabase
-        ?.from('users')
-        .select("*,user_account(*)")
-        .eq("id", id)
-        .single();
-
-    final project = await SupabaseIntegration.supabase
-        ?.from('projects')
-        .select(
-            "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
-        .eq("admin_id", id);
-    userProfile!["projects"] = project;
-
-    return UserDetails.fromJson(userProfile);
-  } catch (error) {
-    throw FormatException(error.toString());
   }
 }

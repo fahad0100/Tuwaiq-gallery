@@ -1,13 +1,13 @@
 
-# Tuwaiq API Documentation
+# Twuaiq API Documentation
 
 ## Introduction
-Welcome to the Tuwaiq gallery documentation. This document provides comprehensive information about the available endpoints for managing authentication, user profiles, projects, and administrative tasks on the Tuwaiq gallery platform.
+Welcome to the Twuaiq API documentation. This document provides comprehensive information about the available endpoints for managing authentication, user profiles, projects, and administrative tasks on the Twuaiq gallery platform.
 
 ### Base URL
 All API requests should be made to the following base URL:
 ```
-http://0.0.0.0:8080
+https://tuwaiq-gallery.onrender.com
 ```
 
 ## Authentication
@@ -507,7 +507,7 @@ http://0.0.0.0:8080
 **Request Fields:**
 - **project_name** (Required): The name of the project.
 - **bootcamp_name** (Required): The name of the bootcamp.
-- **type** (Required): The type of the project.
+- **type** (Required): The type of the project select on of this (app, website, vr, ar, ai, ml, ui/ux, gaming, unity, cyber, software, automation, robotic, api, analytics, iot, cloud).
 - **start_date** (Required): The start date of the project.
 - **end_date** (Required): The end date of the project.
 - **presentation_date** (Required): The presentation date of the project.
@@ -1366,5 +1366,3 @@ http://0.0.0.0:8080
 ```
 
 ---
-
-This documentation provides a comprehensive guide to using the Tuwaiq API. If you have any questions or need further assistance, please feel free to contact our support team.# 

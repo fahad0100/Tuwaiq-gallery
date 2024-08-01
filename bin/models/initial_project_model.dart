@@ -10,6 +10,7 @@ class InitialProjectModel {
   String? adminId;
   String? timeEndEdit;
   bool? allowEdit;
+  bool? allowRating;
   bool? isPublic;
 
   InitialProjectModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +36,8 @@ class InitialProjectModel {
       date: json['time_end_edit'],
       title: "End Data edit is required",
     );
+    allowRating = Validation.isValidBoolean(
+        value: json['rating'].toString(), title: 'allow rating');
   }
 
   Map<String, dynamic> toJson() {
@@ -43,7 +46,8 @@ class InitialProjectModel {
     data['admin_id'] = adminId;
     data['time_end_edit'] = timeEndEdit;
     data['allow_edit'] = allowEdit;
-    data['is_public'] = allowEdit;
+    data['is_public'] = isPublic;
+    data['allow_rating'] = allowRating;
     data.removeWhere((key, value) => value == null);
     return data;
   }

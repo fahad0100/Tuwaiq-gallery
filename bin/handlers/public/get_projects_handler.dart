@@ -1,7 +1,8 @@
 import 'package:shelf/shelf.dart';
 import '../../customize/response.dart';
-import '../../integration/supabase/supabase_integration.dart';
-import '../../models/users/project_deltels.dart';
+import '../../helper/get_data_supabase/fetch_all_projects.dart';
+import '../../helper/get_data_supabase/fetch_projects_with_parm.dart';
+import '../../models/users/project_deletes.dart';
 
 Future<Response> searchProjectHandler(Request req) async {
   try {
@@ -44,10 +45,10 @@ Future<Response> searchProjectHandler(Request req) async {
         valueSearch == null &&
         from == null &&
         to == null) {
-      responseResult = await _fetchAllProjects();
+      responseResult = await fetchAllProjects();
     } else {
       responseResult =
-          await _fetchProjects(columnSearch, valueSearch, from, to);
+          await fetchProjectsWithParm(columnSearch, valueSearch, from, to);
     }
 
     // Fetch projects from database
@@ -66,62 +67,4 @@ int _parseRange(String value) {
     throw FormatException("Invalid range value: $value");
   }
   return parsed - 1;
-}
-
-Future<List<ProjectsDetails>> _fetchProjects(
-    String? columnSearch, String? valueSearch, int? from, int? to) async {
-  final rangeFrom = from ?? 0;
-  final rangeTo = to ?? 99;
-  if ((rangeTo - rangeFrom + 1) > 100) {
-    throw FormatException("Range 'from' - 'to' should be less than 100");
-  }
-
-  List<Map<String, dynamic>>? projectsDataBase = [];
-  if (columnSearch == null) {
-    print("=0=0=0=0=0=0=");
-    projectsDataBase = await SupabaseIntegration.supabase!
-        .from("projects")
-        .select(
-            "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
-        .eq("is_public", true)
-        .range(rangeFrom, rangeTo)
-        .order("create_at");
-  } else {
-    print("=1=1=1=11=1=11=1");
-    projectsDataBase = await SupabaseIntegration.supabase!
-        .from("projects")
-        .select(
-            "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
-        .eq("is_public", true)
-        .ilike(columnSearch, '%$valueSearch%')
-        .range(rangeFrom, rangeTo)
-        .order("create_at");
-  }
-
-  List<ProjectsDetails> projects = [];
-
-  for (var element in projectsDataBase) {
-    projects.add(ProjectsDetails.fromJson(element));
-  }
-  return projects;
-}
-
-//?-----------------
-
-Future<List<ProjectsDetails>> _fetchAllProjects() async {
-  List<Map<String, dynamic>>? projectsDataBase = await SupabaseIntegration
-      .supabase
-      ?.from('projects')
-      .select(
-          "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
-      .eq("is_public", true)
-      .order("create_at");
-
-  List<ProjectsDetails> projects = [];
-
-  for (var element in projectsDataBase ?? []) {
-    projects.add(ProjectsDetails.fromJson(element));
-  }
-
-  return projects;
 }

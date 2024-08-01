@@ -18,6 +18,8 @@ CREATE TABLE
     allow_edit BOOLEAN NOT NULL default false,
     is_public BOOLEAN NOT NULL default false,
     create_at TIMESTAMP NOT NULL default current_timestamp,
+    rating DOUBLE PRECISION NOT NULL DEFAULT 0 CHECK (rating >= 0 AND rating <= 5),,
+    allow_rating boolean not null default false,
     update_at TIMESTAMP,
     FOREIGN key (user_id) references public.users (id) ON DELETE CASCADE
   );
@@ -96,7 +98,7 @@ CREATE TABLE project_tags (
 drop table project_evaluation;
 
 CREATE TABLE project_evaluation (
-    id SERIAL PRIMARY KEY,
+
     project_id VARCHAR(12),
     user_id uuid NOT NULL,
     comment text ,
@@ -107,6 +109,7 @@ CREATE TABLE project_evaluation (
     presentation INT CHECK (presentation >= 0 AND presentation <= 10),
     investment INT CHECK (investment >= 0 AND investment <= 10),
     total_score INT GENERATED ALWAYS AS (idea + design + tools + practices + presentation + investment) STORED,
+    primary key (project_id,user_id),
     FOREIGN key (project_id) references public.projects (project_id) ON DELETE CASCADE,
     FOREIGN key (user_id) references public.users (id) ON DELETE CASCADE
 

@@ -3,7 +3,7 @@ import '../../customize/exception.dart';
 import '../../customize/response.dart';
 import '../../helper/validations/validations.dart';
 import '../../integration/supabase/supabase_integration.dart';
-import '../../models/users/project_deltels.dart';
+import '../../models/users/project_deletes.dart';
 
 getProjectByIDHandler(Request req, String id) async {
   try {

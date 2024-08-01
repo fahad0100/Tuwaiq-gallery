@@ -1,4 +1,4 @@
-import 'project_deltels.dart';
+import 'project_deletes.dart';
 
 class UserDetails {
   UserDetails({

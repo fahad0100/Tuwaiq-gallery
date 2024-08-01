@@ -6,7 +6,7 @@ import '../../helper/token.dart';
 import '../../helper/validations/validations.dart';
 import '../../integration/supabase/supabase_integration.dart';
 import '../../models/initial_project_model.dart';
-import '../../models/users/project_deltels.dart';
+import '../../models/users/project_deletes.dart';
 
 changeStatusProjectSupervisorHandler(Request req, String id) async {
   try {

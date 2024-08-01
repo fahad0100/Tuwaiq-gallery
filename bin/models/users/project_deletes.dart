@@ -35,6 +35,7 @@ class ProjectsDetails {
   String? timeEndEdit;
   bool? allowEdit;
   bool? isPublic;
+  bool? allowRating;
   String? createAt;
   String? updateAt;
   List<ImagesProject>? imagesProject;
@@ -57,6 +58,7 @@ class ProjectsDetails {
     adminId = json['admin_id'];
     timeEndEdit = json['time_end_edit'];
     allowEdit = json['allow_edit'];
+    allowRating = json['allow_rating'];
     isPublic = json['is_public'];
     createAt = json['create_at'];
     updateAt = json['update_at'];
@@ -87,6 +89,7 @@ class ProjectsDetails {
     data['admin_id'] = adminId;
     data['time_end_edit'] = timeEndEdit;
     data['allow_edit'] = allowEdit;
+    data['allow_rating'] = allowRating;
     data['is_public'] = isPublic;
     data['create_at'] = createAt;
     data['update_at'] = updateAt;

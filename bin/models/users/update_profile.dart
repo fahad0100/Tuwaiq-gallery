@@ -1,5 +1,5 @@
 import '../../helper/validations/validations.dart';
-import 'project_deltels.dart';
+import 'project_deletes.dart';
 
 class UpdateProfileModel {
   UpdateProfileModel({
