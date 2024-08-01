@@ -7,7 +7,6 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_helmet/shelf_helmet.dart';
 import 'package:shelf_rate_limiter/shelf_rate_limiter.dart';
-import 'helper/upload_to_supabase/upload/upload_image.dart';
 import 'integration/supabase/supabase_integration.dart';
 import 'routes/version_routes.dart';
 import 'package:shelf_hotreload/shelf_hotreload.dart';
@@ -26,40 +25,29 @@ void main(List<String> args) async {
 
 FutureOr<HttpServer> createServer() async {
   await SupabaseIntegration().supabaseInit();
+
   final ip = InternetAddress.anyIPv4;
   const int maxContentLength = 4 * 1024 * 1024;
-  await forDeleteAllFileProjects(id: 'p-R95P0ETPMY');
-  maxContentLengthValidator(
-    maxContentLength: maxContentLength,
-  );
+
   final overrideHeaders = {
     ACCESS_CONTROL_ALLOW_ORIGIN: 'https://tuwaiq-gallery.onrender.com',
     'Content-Type': 'application/json;charset=utf-8',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
     'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
   };
+
   final memoryStorage = MemStorage();
   final rateLimiter = ShelfRateLimiter(
       storage: memoryStorage, duration: Duration(seconds: 60), maxRequests: 10);
+
   final handler = Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(rateLimiter.rateLimiter())
       .addMiddleware(
           maxContentLengthValidator(maxContentLength: maxContentLength))
       .addMiddleware(corsHeaders(headers: overrideHeaders))
+      .addMiddleware(_securityHeadersMiddleware())
       .addMiddleware(helmet())
-      .addMiddleware(contentSecurityPolicy())
-      .addMiddleware(crossOriginOpenerPolicy())
-      .addMiddleware(crossOriginResourcePolicy())
-      .addMiddleware(originAgentCluster())
-      .addMiddleware(referrerPolicy())
-      .addMiddleware(strictTransportSecurity())
-      .addMiddleware(xContentTypeOptions())
-      .addMiddleware(xDnsPrefetchControl())
-      .addMiddleware(xDownloadOptions())
-      .addMiddleware(xFrameOptions())
-      .addMiddleware(xPermittedCrossDomainPolicies())
-      .addMiddleware(xXssProtection())
       .addHandler(VersionRoute().route.call);
 
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
@@ -70,4 +58,28 @@ FutureOr<HttpServer> createServer() async {
       'Server listening on port http://${server.address.host}:${server.port}');
 
   return server;
+}
+
+Middleware _securityHeadersMiddleware() {
+  return (Handler innerHandler) {
+    return (Request request) async {
+      final response = await innerHandler(request);
+      return response.change(headers: {
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block',
+        'X-Content-Type-Options': 'nosniff',
+        'Strict-Transport-Security':
+            'max-age=63072000; includeSubDomains; preload',
+        'Referrer-Policy': 'no-referrer',
+        'X-DNS-Prefetch-Control': 'off',
+        'Feature-Policy': "geolocation 'self'; vibrate 'none'",
+        'Permissions-Policy': "geolocation=(self), vibrate=()",
+        'Content-Security-Policy':
+            "default-src 'self'; script-src 'self'; object-src 'none';",
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Resource-Policy': 'same-origin',
+        'X-Powered-By': "self"
+      });
+    };
+  };
 }
