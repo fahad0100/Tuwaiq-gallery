@@ -13,15 +13,15 @@ import 'routes/version_routes.dart';
 import 'package:shelf_hotreload/shelf_hotreload.dart';
 
 void main(List<String> args) async {
-  withHotreload(
-    () => createServer(),
-    onReloaded: () => print('Reload!'),
-    onHotReloadNotAvailable: () => print('No hot-reload :('),
-    onHotReloadAvailable: () => print('Yay! Hot-reload :)'),
-    onHotReloadLog: (log) => print('Reload Log: ${log.message}'),
-    logLevel: Level.INFO,
-  );
-  // await createServer();
+  // withHotreload(
+  //   () => createServer(),
+  //   onReloaded: () => print('Reload!'),
+  //   onHotReloadNotAvailable: () => print('No hot-reload :('),
+  //   onHotReloadAvailable: () => print('Yay! Hot-reload :)'),
+  //   onHotReloadLog: (log) => print('Reload Log: ${log.message}'),
+  //   logLevel: Level.INFO,
+  // );
+  await createServer();
 }
 
 FutureOr<HttpServer> createServer() async {
