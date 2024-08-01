@@ -18,6 +18,12 @@ dependencies:
   supabase: ^2.2.5
   uuid: ^4.4.2
 
+  #security
+  shelf_helmet: ^2.3.0
+  shelf_rate_limiter: ^1.0.1
+  content_length_validator: ^1.2.1
+  shelf_cors_headers: ^0.1.5
+
 dev_dependencies:
   http: ^1.1.0
   lints: ^3.0.0

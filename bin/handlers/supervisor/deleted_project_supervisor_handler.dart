@@ -2,10 +2,11 @@ import 'package:shelf/shelf.dart';
 import '../../customize/exception.dart';
 import '../../customize/response.dart';
 import '../../helper/token.dart';
+import '../../helper/upload_to_supabase/upload/upload_image.dart';
 import '../../helper/validations/validations.dart';
 import '../../integration/supabase/supabase_integration.dart';
 
-deleteProjectSupervisorHandler(Request req, String id) async {
+Future<Response> deleteProjectSupervisorHandler(Request req, String id) async {
   try {
     Validation.isValidPrefixedUuid(
         prefix: 'p-', value: id, title: "ID project");
@@ -22,6 +23,7 @@ deleteProjectSupervisorHandler(Request req, String id) async {
     if (x!.isEmpty) {
       throw NotFoundException(message: "Not found project");
     }
+    await forDeleteAllFileProjects(id: id);
 
     return ResponseClass().succeedResponse(
         message: "success",

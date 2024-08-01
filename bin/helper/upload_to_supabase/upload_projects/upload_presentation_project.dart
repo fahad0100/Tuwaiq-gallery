@@ -11,8 +11,8 @@ Future<void> uploadPresentationProject(
     }
     try {
       final url = await uploadPDF(
-          bucket: 'images',
-          folder: 'projects.pdf',
+          bucket: 'projects',
+          folder: 'projects_pdf',
           projectId: "$projectId-p",
           imageBinary: Uint8List.fromList(presentation));
       await SupabaseIntegration.supabase!
@@ -21,6 +21,7 @@ Future<void> uploadPresentationProject(
           .eq('project_id', projectId)
           .select();
     } catch (error) {
+      print(error);
       throw FormatException("Error with Upload pdf project");
     }
   } catch (error) {

@@ -38,6 +38,7 @@ Future<String> uploadPDF({
         .getPublicUrl('$folder/$projectId-$id.pdf');
     return result;
   } catch (error) {
+    print(error);
     throw FormatException("Error with init upload pdf");
   }
 }

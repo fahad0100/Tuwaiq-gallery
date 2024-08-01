@@ -19,7 +19,7 @@ Future<void> uploadImagesProject(
         final count = entry.key + 1;
         final image = entry.value;
         return uploadImage(
-                bucket: 'images',
+                bucket: 'projects',
                 folder: 'project_images',
                 projectId: "$projectId-$count",
                 imageBinary: Uint8List.fromList(image))

@@ -115,3 +115,32 @@ Future<String> uploadCVProfile({
     throw FormatException("Error with init upload CV");
   }
 }
+
+Future<void> forDeleteAllFileProjects({required String id}) async {
+  try {
+    final listBucket = ["projects_pdf", "project_images", "projects_logo"];
+
+    // قم بتخزين جميع Future في قائمة وانتظارهم مرة واحدة في النهاية
+    final List<Future> deleteOperations = [];
+
+    for (var element in listBucket) {
+      final list = await SupabaseIntegration.supabase!.storage
+          .from("projects")
+          .list(path: element, searchOptions: SearchOptions(limit: 100000000));
+
+      for (var imagesGet in list) {
+        if (imagesGet.name.startsWith(id)) {
+          print(imagesGet.name);
+          deleteOperations.add(SupabaseIntegration.supabase!.storage
+              .from('projects')
+              .remove(["$element/${imagesGet.name}"]));
+        }
+      }
+    }
+
+    // انتظار جميع العمليات لتنفيذها مرة واحدة
+    await Future.wait(deleteOperations);
+  } catch (error) {
+    throw FormatException("There error with delete file for project");
+  }
+}

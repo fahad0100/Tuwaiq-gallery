@@ -11,7 +11,7 @@ Future<void> uploadLogoProject(
     }
     try {
       final url = await uploadImage(
-          bucket: 'images',
+          bucket: 'projects',
           folder: 'projects_logo',
           projectId: "$projectId-logo",
           imageBinary: Uint8List.fromList(logo));
