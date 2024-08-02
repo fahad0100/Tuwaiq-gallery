@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
-import '../../../customize/exception.dart';
 import '../../../customize/response.dart';
 import '../../../helper/get_data_supabase/get_projects_for_owner.dart';
 import '../../../helper/token.dart';
-import '../../../helper/validations/validations.dart';
 import '../../../integration/supabase/supabase_integration.dart';
 import '../../../models/project_model.dart';
-import 'update_base_projects_user_handler.dart';
+import '../../../helper/get_data_supabase/check_before_edit_project.dart';
 
 Future<Response> editLinkProjectUserHandler(Request req, String id) async {
   try {

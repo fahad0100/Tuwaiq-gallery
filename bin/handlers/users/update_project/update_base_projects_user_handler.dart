@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
-import '../../../customize/exception.dart';
 import '../../../customize/response.dart';
+import '../../../helper/get_data_supabase/check_before_edit_project.dart';
 import '../../../helper/get_data_supabase/get_projects_for_owner.dart';
 import '../../../helper/token.dart';
 import '../../../helper/upload_to_supabase/upload_projects/upload_logo_project.dart';
 import '../../../helper/upload_to_supabase/upload_projects/upload_presentation_project.dart';
-import '../../../helper/validations/validations.dart';
 import '../../../integration/supabase/supabase_integration.dart';
 import '../../../models/project_model.dart';
-import '../../../models/token_model.dart';
 
 Future<Response> editBaseProjectUserHandler(Request req, String id) async {
   try {
@@ -43,46 +41,4 @@ Future<Response> editBaseProjectUserHandler(Request req, String id) async {
   } catch (error) {
     return CatchTheError(error: error).errorMessage();
   }
-}
-
-Future<ProjectModel> checkBeforeEditProject(
-    {required String id,
-    required TokenModel tokenData,
-    required ProjectModel body}) async {
-  Validation.isValidPrefixedUuid(prefix: 'p-', value: id, title: "ID project");
-
-  body.projectId = id;
-
-  var project = await SupabaseIntegration.supabase!
-      .from("projects")
-      .select('*')
-      .eq('project_id', id)
-      .maybeSingle();
-
-  if (project == null) {
-    throw NotFoundException(message: "No project found");
-  }
-  body.fromDataBaseCheckerFirst(project);
-
-  bool allowEdit = false;
-  if (tokenData.roleUser == "admin") {
-    allowEdit = true;
-    print("------1");
-  } else if (tokenData.roleUser == "supervisor") {
-    if (tokenData.idDataBase != body.adminId) {
-      throw FormatException(
-          "You are not his supervisor and therefore not allowed to edit this project.");
-    } else {
-      allowEdit = true;
-      print("------2");
-    }
-  } else if (body.userId == tokenData.idDataBase && body.allowEdit == true) {
-    allowEdit = true;
-    print("------3");
-  } else {
-    print("------4");
-    throw FormatException("Not allowed to edit this project.");
-  }
-
-  return body;
 }

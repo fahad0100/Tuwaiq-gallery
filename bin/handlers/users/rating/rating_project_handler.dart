@@ -32,10 +32,10 @@ Future<Response> ratingProjectHandler(Request req, String id) async {
         .from("project_evaluation")
         .upsert(body.toJson());
 
-    await getRating(idProjects: id);
+    final result = await getRating(idProjects: id);
 
     return ResponseClass()
-        .succeedResponse(message: "success", data: body.toJson());
+        .succeedResponse(message: "success", data: {"rating": result});
   } catch (error) {
     return CatchTheError(error: error).errorMessage();
   }

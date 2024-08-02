@@ -1,8 +1,12 @@
 import 'package:shelf/shelf.dart';
 import 'package:supabase/supabase.dart';
-
 import 'exception.dart';
 import 'response.dart';
+import 'response_method/error_auth_exception.dart';
+import 'response_method/error_format_exception.dart';
+import 'response_method/error_not_found_exception.dart';
+import 'response_method/error_postgrest_exception.dart';
+import 'response_method/error_storage_exception.dart';
 
 class CatchTheError {
   final dynamic error;
@@ -28,66 +32,4 @@ class CatchTheError {
           .errorResponse(message: "ErrorEnd", data: error.toString());
     }
   }
-}
-
-Response errorFormatException({required FormatException error}) {
-  return ResponseClass()
-      .errorResponse(message: "Error", data: error.message.toString());
-}
-
-Response errorStorageException({required StorageException error}) {
-  String message = '';
-  switch (error.message) {
-    case 'The object exceeded the maximum allowed size':
-      message = 'File not allow size';
-      break;
-
-    default:
-      message = error.message;
-  }
-  return ResponseClass().errorResponse(message: "Error", data: message);
-}
-
-Response errorAuthException({required AuthException error}) {
-  String message = '';
-  switch (error.message) {
-    case 'A user with this email address has already been registered':
-      message = 'Email address has already use';
-      break;
-    case 'Token has expired or is invalid':
-      message = 'OTP has expired or is out time';
-      break;
-    case 'Signups not allowed for otp':
-      message = 'Create account first to allow Login in';
-      break;
-
-    default:
-      message = error.message;
-  }
-  return ResponseClass().errorResponse(message: "Error", data: message);
-}
-
-Response errorPostgrestException({required PostgrestException error}) {
-  String message = '';
-  switch (error.message) {
-    case 'A user with this email address has already been registered':
-      message = 'Email address has already use';
-      break;
-    case 'Token has expired or is invalid':
-      message = 'Token has expired or is out time';
-      break;
-    default:
-      message = error.message;
-  }
-  return ResponseClass().errorResponse(message: "Error", data: message);
-}
-
-Response errorNotFoundException({required NotFoundException error}) {
-  String message = '';
-  switch (error.message) {
-    default:
-      message = error.message;
-  }
-  return ResponseClass()
-      .errorResponse(message: "Error", data: message, code: 404);
 }

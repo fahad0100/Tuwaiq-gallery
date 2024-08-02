@@ -1,6 +1,6 @@
 import '../../integration/supabase/supabase_integration.dart';
 
-Future<void> getRating({required String idProjects}) async {
+Future getRating({required String idProjects}) async {
   final response = await SupabaseIntegration.supabase!
       .from("project_evaluation")
       .select('total_score')
@@ -19,5 +19,9 @@ Future<void> getRating({required String idProjects}) async {
 
   await SupabaseIntegration.supabase!
       .from("projects")
-      .update({"rating": finalRating}).eq("project_id", idProjects);
+      .update({"rating": finalRating})
+      .eq("project_id", idProjects)
+      .select();
+
+  return finalRating;
 }

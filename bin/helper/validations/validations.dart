@@ -275,4 +275,33 @@ class Validation {
     print("-------------------end");
     return value.trim();
   }
+
+  //?-----------------------------------------------------
+  //?-----------------------------------------------------
+  static int? isValidRatingValue({
+    String? value,
+    bool? isOption = false,
+    String? title,
+  }) {
+    try {
+      if (isOption == true) {
+        if (value == null || value.isEmpty) {
+          return null;
+        }
+      }
+      // Regular expression for username validation
+      int? parsedValue = int.tryParse(value!);
+      if (parsedValue == null) {
+        throw FormatException("$title value is not an integer number.".trim());
+      } else if (parsedValue < 0) {
+        throw FormatException("$title value should be great then 0.".trim());
+      } else if (parsedValue > 10) {
+        throw FormatException("$title value should be less then 10".trim());
+      }
+
+      return parsedValue;
+    } catch (error) {
+      rethrow;
+    }
+  }
 }

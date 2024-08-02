@@ -1,3 +1,5 @@
+import '../helper/validations/validations.dart';
+
 class ProjectEvaluation {
   ProjectEvaluation({
     this.idea,
@@ -21,15 +23,25 @@ class ProjectEvaluation {
   String? projectId;
 
   ProjectEvaluation.fromJson(Map<String, dynamic> json) {
-    idea = json['idea'] ?? 0;
-    design = json['design'] ?? 0;
-    tools = json['tools'];
-    practices = json['practices'] ?? 0;
-    presentation = json['presentation'] ?? 0;
-    investment = json['investment'] ?? 0;
+    idea = Validation.isValidRatingValue(
+        value: json['idea'].toString(), title: 'Idea rating');
+
+    design = Validation.isValidRatingValue(
+        value: json['design'].toString(), title: 'Design rating');
+
+    tools = Validation.isValidRatingValue(
+        value: json['tools'].toString(), title: 'Tools rating');
+
+    practices = Validation.isValidRatingValue(
+        value: json['practices'].toString(), title: 'Practices rating');
+
+    presentation = Validation.isValidRatingValue(
+        value: json['presentation'].toString(), title: 'Presentation rating');
+
+    investment = Validation.isValidRatingValue(
+        value: json['investment'].toString(), title: 'Investment rating');
+
     note = json['note'];
-    userId = json['user_id'];
-    projectId = json['project_id'];
   }
 
   Map<String, dynamic> toJson() {
