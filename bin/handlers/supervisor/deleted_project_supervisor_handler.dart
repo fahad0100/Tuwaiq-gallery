@@ -12,13 +12,21 @@ Future<Response> deleteProjectSupervisorHandler(Request req, String id) async {
         prefix: 'p-', value: id, title: "ID project");
 
     final user = await getTokenFromHeader(req: req);
-
-    final x = await SupabaseIntegration.supabase
-        ?.from('projects')
-        .delete()
-        .eq("admin_id", user.idDataBase)
-        .eq("project_id", id)
-        .select("*");
+    var x;
+    if (user.roleUser == "admin") {
+      x = await SupabaseIntegration.supabase
+          ?.from('projects')
+          .delete()
+          .eq("project_id", id)
+          .select("*");
+    } else {
+      x = await SupabaseIntegration.supabase
+          ?.from('projects')
+          .delete()
+          .eq("admin_id", user.idDataBase)
+          .eq("project_id", id)
+          .select("*");
+    }
 
     if (x!.isEmpty) {
       throw NotFoundException(message: "Not found project");

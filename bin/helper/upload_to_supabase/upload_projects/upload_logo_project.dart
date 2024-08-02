@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:supabase/supabase.dart';
+
 import '../../../integration/supabase/supabase_integration.dart';
 import '../upload/upload_image.dart';
 
@@ -9,21 +11,20 @@ Future<void> uploadLogoProject(
     if (logo.isEmpty) {
       throw FormatException("Error with Upload empty Logo project");
     }
-    try {
-      final url = await uploadImage(
-          bucket: 'projects',
-          folder: 'projects_logo',
-          projectId: "$projectId-logo",
-          imageBinary: Uint8List.fromList(logo));
-      await SupabaseIntegration.supabase!
-          .from("projects")
-          .update({'logo_url': url})
-          .eq('project_id', projectId)
-          .select();
-    } catch (error) {
-      throw FormatException("Error with Upload Logo project");
-    }
+
+    final url = await uploadImage(
+        bucket: 'logo',
+        folder: null,
+        projectId: "$projectId-logo",
+        imageBinary: Uint8List.fromList(logo));
+    await SupabaseIntegration.supabase!
+        .from("projects")
+        .update({'logo_url': url})
+        .eq('project_id', projectId)
+        .select();
+  } on StorageException catch (_) {
+    throw StorageException("The size of logo image should be less than 225 KB");
   } catch (error) {
-    rethrow;
+    throw FormatException(error.toString());
   }
 }

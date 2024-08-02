@@ -8,29 +8,16 @@ import '../../../helper/upload_to_supabase/upload_projects/upload_images_project
 import '../../../helper/validations/validations.dart';
 import '../../../integration/supabase/supabase_integration.dart';
 import '../../../models/project_model.dart';
+import 'update_base_projects_user_handler.dart';
 
 Future<Response> editImagesProjectUserHandler(Request req, String id) async {
   try {
-    Validation.isValidPrefixedUuid(
-        prefix: 'p-', value: id, title: "ID project");
-    final body = ProjectModel.fromJsonImagesRequestEdit(
+    ProjectModel body = ProjectModel.fromJsonImagesRequestEdit(
         json.decode(await req.readAsString()));
     final userToken = await getTokenFromHeader(req: req);
-    body.projectId = id;
 
-    final projectData = await SupabaseIntegration.supabase!
-        .from("projects")
-        .select('*')
-        .eq('project_id', id)
-        .maybeSingle();
-
-    if (projectData == null) {
-      throw NotFoundException(message: "No project found");
-    }
-    body.fromDataBaseCheckerFirst(projectData);
-    if (userToken.idDataBase != body.userId || !body.allowEdit!) {
-      throw FormatException("Not allowed to edit this project");
-    }
+    body =
+        await checkBeforeEditProject(body: body, id: id, tokenData: userToken);
 
     final futures = <Future>[
       uploadImagesProject(images: body.images!, projectId: id),
@@ -39,8 +26,7 @@ Future<Response> editImagesProjectUserHandler(Request req, String id) async {
     ];
 
     await Future.wait(futures);
-    final result = await getProjectsForOwner(
-        idProject: body.projectId!, idUser: userToken.idDataBase);
+    final result = await getProjectsForOwner(idProject: body.projectId!);
     return ResponseClass()
         .succeedResponse(message: "success", data: result.toJson());
   } catch (error) {

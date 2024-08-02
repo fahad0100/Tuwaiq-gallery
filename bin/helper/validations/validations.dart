@@ -252,4 +252,27 @@ class Validation {
       throw FormatException("Error with format date $title".trim());
     }
   }
+
+  //?-----------------------------------------------------
+  //?-----------------------------------------------------
+  static String? isValidUsername({
+    String? value,
+    bool? isOption = false,
+    String? title,
+  }) {
+    if (isOption == true) {
+      if (value == null || value.isEmpty) {
+        return null;
+      }
+    }
+    // Regular expression for username validation
+    final RegExp usernameRegExp = RegExp(r'^[a-zA-Z][a-zA-Z0-9._-]{2,50}$');
+
+    if (!usernameRegExp.hasMatch(value!.trim())) {
+      throw FormatException("$title Invalid username".trim());
+    }
+
+    print("-------------------end");
+    return value.trim();
+  }
 }

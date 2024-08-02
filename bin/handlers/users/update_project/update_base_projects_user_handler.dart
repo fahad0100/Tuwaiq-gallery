@@ -9,30 +9,16 @@ import '../../../helper/upload_to_supabase/upload_projects/upload_presentation_p
 import '../../../helper/validations/validations.dart';
 import '../../../integration/supabase/supabase_integration.dart';
 import '../../../models/project_model.dart';
+import '../../../models/token_model.dart';
 
 Future<Response> editBaseProjectUserHandler(Request req, String id) async {
   try {
-    Validation.isValidPrefixedUuid(
-        prefix: 'p-', value: id, title: "ID project");
-    final body = ProjectModel.fromJsonBaseRequestEdit(
+    ProjectModel body = ProjectModel.fromJsonBaseRequestEdit(
         json.decode(await req.readAsString()));
     final userToken = await getTokenFromHeader(req: req);
-    body.projectId = id;
 
-    final projectData = await SupabaseIntegration.supabase!
-        .from("projects")
-        .select('*')
-        .eq('project_id', id)
-        .maybeSingle();
-
-    if (projectData == null) {
-      throw NotFoundException(message: "No project found");
-    }
-    body.fromDataBaseCheckerFirst(projectData);
-    if (userToken.idDataBase != body.userId || !body.allowEdit!) {
-      throw FormatException("Not allowed to edit this project");
-    }
-
+    body =
+        await checkBeforeEditProject(body: body, id: id, tokenData: userToken);
     final futures = <Future>[
       if (body.projectLogo != null)
         uploadLogoProject(logo: body.projectLogo!, projectId: body.projectId!),
@@ -43,19 +29,60 @@ Future<Response> editBaseProjectUserHandler(Request req, String id) async {
           .from("projects")
           .update(body.toJsonUpdateBase())
           .eq('project_id', id)
-          .eq('user_id', userToken.idDataBase)
+          .eq('user_id', body.userId!)
           .eq('allow_edit', true)
           .select("*,images_project(*),links_project(*),members_project(*)")
           .single()
     ];
     await Future.wait(futures);
 
-    final result = await getProjectsForOwner(
-        idProject: body.projectId!, idUser: userToken.idDataBase);
+    final result = await getProjectsForOwner(idProject: body.projectId!);
 
     return ResponseClass()
         .succeedResponse(message: "success", data: result.toJson());
   } catch (error) {
     return CatchTheError(error: error).errorMessage();
   }
+}
+
+Future<ProjectModel> checkBeforeEditProject(
+    {required String id,
+    required TokenModel tokenData,
+    required ProjectModel body}) async {
+  Validation.isValidPrefixedUuid(prefix: 'p-', value: id, title: "ID project");
+
+  body.projectId = id;
+
+  var project = await SupabaseIntegration.supabase!
+      .from("projects")
+      .select('*')
+      .eq('project_id', id)
+      .maybeSingle();
+
+  if (project == null) {
+    throw NotFoundException(message: "No project found");
+  }
+  body.fromDataBaseCheckerFirst(project);
+
+  bool allowEdit = false;
+  if (tokenData.roleUser == "admin") {
+    allowEdit = true;
+    print("------1");
+  } else if (tokenData.roleUser == "supervisor") {
+    if (tokenData.idDataBase != body.adminId) {
+      throw FormatException(
+          "You are not his supervisor and therefore not allowed to edit this project.");
+    } else {
+      allowEdit = true;
+      print("------2");
+    }
+  } else if (body.userId == tokenData.idDataBase && body.allowEdit == true) {
+    allowEdit = true;
+    print("------3");
+  } else {
+    print("------4");
+    throw FormatException("Not allowed to edit this project.");
+  }
+
+  return body;
 }

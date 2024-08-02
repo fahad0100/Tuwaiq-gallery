@@ -31,7 +31,7 @@ class UpdateProfileModel {
         input: json['cv'].toString(), title: "image", isOption: true);
 
     accounts = json['accounts'] != null
-        ? UserAccount.fromJson(json['accounts'])
+        ? UserAccount.fromJsonRequest(json['accounts'])
         : null;
   }
 
@@ -40,7 +40,6 @@ class UpdateProfileModel {
     data['f_name'] = fName;
     data['l_name'] = lName;
     data['image'] = imageURL;
-    data['resume'] = resumeURL;
 
     data.removeWhere((key, value) => value == null);
     return data;
@@ -49,7 +48,7 @@ class UpdateProfileModel {
   Map<String, dynamic> toJsonAccountUpdate() {
     final data = <String, dynamic>{};
 
-    data['accounts'] = accounts?.toJson();
+    data['accounts'] = accounts?.toJsonDataBase();
     data.removeWhere((key, value) => value == null);
     return data;
   }

@@ -11,12 +11,11 @@ class UserDetails {
     required this.updatedAt,
     required this.allowEdit,
     required this.role,
-    required this.userAccount,
-    required this.projects,
+    this.userAccount,
+    this.projects,
   });
   late final String id;
   String? imageURL;
-  String? resumeURL;
   late final String authId;
   late final String fName;
   late final String lName;
@@ -25,13 +24,12 @@ class UserDetails {
   late final String updatedAt;
   late final String allowEdit;
   late final String role;
-  late final UserAccount userAccount;
-  late final List<ProjectsDetails> projects;
+  UserAccount? userAccount;
+  List<ProjectsDetails>? projects;
 
   UserDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     imageURL = json['image'];
-    resumeURL = json['resume'];
     authId = json['auth_id'];
     fName = json['f_name'];
     lName = json['l_name'];
@@ -40,8 +38,8 @@ class UserDetails {
     updatedAt = json['updated_at'];
     allowEdit = json['allow_edit'];
     role = json['role'];
-    userAccount = UserAccount.fromJson(json['user_account'] ?? {});
-    projects = List.from(json['projects'])
+    userAccount = UserAccount.fromJsonDataBase(json['user_account'] ?? {});
+    projects = List.from(json['projects'] ?? {})
         .map((e) => ProjectsDetails.fromJson(e))
         .toList();
   }
@@ -54,9 +52,8 @@ class UserDetails {
     data['email'] = email;
     data['role'] = role;
     data['image_url'] = imageURL;
-    data['resume_url'] = resumeURL;
-    data['link'] = userAccount.toJson();
-    data['projects'] = projects.map((e) => e.toJson()).toList();
+    data['link'] = userAccount?.toJson();
+    data['projects'] = projects?.map((e) => e.toJson()).toList();
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     return data;

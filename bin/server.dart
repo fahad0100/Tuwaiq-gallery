@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:content_length_validator/content_length_validator.dart';
 import 'package:shelf/shelf.dart';
@@ -27,7 +28,8 @@ FutureOr<HttpServer> createServer() async {
   await SupabaseIntegration().supabaseInit();
 
   final ip = InternetAddress.anyIPv4;
-  const int maxContentLength = 4 * 1024 * 1024;
+  const int maxContentLength = 7 * 1024 * 1024;
+  print(maxContentLength);
 
   final overrideHeaders = {
     ACCESS_CONTROL_ALLOW_ORIGIN: 'https://tuwaiq-gallery.onrender.com',
@@ -42,6 +44,7 @@ FutureOr<HttpServer> createServer() async {
 
   final handler = Pipeline()
       .addMiddleware(logRequests())
+      .addMiddleware(logRequestSizeMiddleware())
       .addMiddleware(rateLimiter.rateLimiter())
       .addMiddleware(
           maxContentLengthValidator(maxContentLength: maxContentLength))
@@ -80,6 +83,30 @@ Middleware _securityHeadersMiddleware() {
         'Cross-Origin-Resource-Policy': 'same-origin',
         'X-Powered-By': "self"
       });
+    };
+  };
+}
+
+//?
+
+Middleware logRequestSizeMiddleware() {
+  return (Handler handler) {
+    return (Request request) async {
+      var requestSize = 0;
+
+      // If the request has a content length, use it
+      if (request.contentLength != null) {
+        requestSize = request.contentLength!;
+      } else {
+        // If there's no content length, read the body to determine the size
+        final body = await request.readAsString();
+        requestSize = utf8.encode(body).length;
+      }
+
+      final requestSizeInMB = requestSize / (1024 * 1024);
+      print('Request size: ${requestSizeInMB.toStringAsFixed(2)} MB');
+
+      return handler(request);
     };
   };
 }

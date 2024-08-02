@@ -1,3 +1,5 @@
+import '../../helper/validations/validations.dart';
+
 class ProjectsDetails {
   ProjectsDetails({
     this.projectId,
@@ -164,7 +166,6 @@ class MembersProject {
   String? email;
   String? lName;
   String? image;
-  String? resume;
   UserAccount? userAccount;
   String? position;
 
@@ -172,10 +173,10 @@ class MembersProject {
     id = json["users"]['id'];
     fName = json["users"]['f_name'];
     image = json["users"]['image'];
-    resume = json["users"]['resume'];
     email = json["users"]['email'];
     lName = json["users"]['l_name'];
-    userAccount = UserAccount.fromJson(json["users"]['user_account'] ?? {});
+    userAccount =
+        UserAccount.fromJsonDataBase(json["users"]['user_account'] ?? {});
     position = json['position'];
   }
 
@@ -187,7 +188,6 @@ class MembersProject {
     data['email'] = email;
     data['position'] = position;
     data['image_url'] = image;
-    data['resume_url'] = resume;
     data['link'] = userAccount;
     return data;
   }
@@ -205,20 +205,43 @@ class UserAccount {
   String? bindlink;
   String? linkedin;
 
-  UserAccount.fromJson(Map<String, dynamic> json) {
-    github = json['github'];
+  UserAccount.fromJsonRequest(Map<String, dynamic> json) {
+    resume = json['resume'];
+    bindlink = Validation.isValidUsername(
+        value: json['bindlink'], title: "Bindlink username");
+    linkedin = Validation.isValidUsername(
+        value: json['linkedin'], title: "Linkedin username");
+    github = Validation.isValidUsername(
+        value: json['github'], title: "Github username");
+  }
+  UserAccount.fromJsonDataBase(Map<String, dynamic> json) {
     resume = json['resume'];
     bindlink = json['bindlink'];
     linkedin = json['linkedin'];
+    github = json['github'];
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJsonDataBase() {
     final data = <String, dynamic>{};
     data['github'] = github;
     data['linkedin'] = linkedin;
     data['resume'] = resume;
     data['bindlink'] = bindlink;
     data.removeWhere((key, value) => value == null);
+    print(data);
+    return data;
+  }
+
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
+
+    data['github'] = github != null ? "https://github.com/$github" : null;
+    data['linkedin'] =
+        linkedin != null ? "https://www.linkedin.com/in/$linkedin/" : null;
+    data['resume'] = resume;
+    data['bindlink'] = bindlink != null ? 'https://bind.link/$bindlink' : null;
+    data.removeWhere((key, value) => value == null);
+    print(data);
     return data;
   }
 }

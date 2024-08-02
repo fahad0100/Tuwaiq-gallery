@@ -7,46 +7,41 @@ import '../../../integration/supabase/supabase_integration.dart';
 
 Future<String> uploadImage({
   required String bucket,
-  required String folder,
+  String? folder,
   required Uint8List imageBinary,
   required String projectId,
 }) async {
-  try {
-    var uuid = Uuid();
-    var id = uuid.v4();
+  var uuid = Uuid();
+  var id = uuid.v4();
 
-    final list = await SupabaseIntegration.supabase!.storage
+  final list = await SupabaseIntegration.supabase!.storage
+      .from(bucket)
+      .list(path: folder, searchOptions: SearchOptions(limit: 100000000));
+
+  final deleteFutures = list
+      .where((element) => element.name.startsWith(projectId))
+      .map((element) {
+    return SupabaseIntegration.supabase!.storage
         .from(bucket)
-        .list(path: folder, searchOptions: SearchOptions(limit: 100000000));
+        .remove(["${folder == null ? "" : "$folder/"}${element.name}"]);
+  }).toList();
 
-    final deleteFutures = list
-        .where((element) => element.name.startsWith(projectId))
-        .map((element) {
-      return SupabaseIntegration.supabase!.storage
-          .from(bucket)
-          .remove(["$folder/${element.name}"]);
-    }).toList();
+  await Future.wait(deleteFutures);
+  final pathName = '${folder == null ? "" : "$folder/"}$projectId-$id.png';
+  await SupabaseIntegration.supabase!.storage
+      .from(bucket)
+      .uploadBinary(pathName, imageBinary);
 
-    await Future.wait(deleteFutures);
-
-    await SupabaseIntegration.supabase!.storage
-        .from(bucket)
-        .uploadBinary('$folder/$projectId-$id.png', imageBinary);
-
-    final result = SupabaseIntegration.supabase!.storage
-        .from(bucket)
-        .getPublicUrl('$folder/$projectId-$id.png');
-    return result;
-  } catch (error) {
-    throw FormatException("Error with init upload image");
-  }
+  final result =
+      SupabaseIntegration.supabase!.storage.from(bucket).getPublicUrl(pathName);
+  return result;
 }
 
 //---------------------------------
 
 Future<String> uploadImageProfile({
   required String bucket,
-  required String folder,
+  String? folder,
   required Uint8List imageBinary,
   required String userID,
 }) async {
@@ -60,12 +55,12 @@ Future<String> uploadImageProfile({
         list.where((element) => element.name.startsWith(userID)).map((element) {
       return SupabaseIntegration.supabase!.storage
           .from(bucket)
-          .remove(["$folder/${element.name}"]);
+          .remove(["${folder == null ? "" : "$folder/"}${element.name}"]);
     }).toList();
 
     await Future.wait(deleteFutures);
 
-    final String name = '$folder/$userID-$time.png';
+    final String name = '${folder == null ? "" : "$folder/"}$userID-$time.png';
 
     await SupabaseIntegration.supabase!.storage
         .from(bucket)
@@ -74,8 +69,11 @@ Future<String> uploadImageProfile({
     final result =
         SupabaseIntegration.supabase!.storage.from(bucket).getPublicUrl(name);
     return result;
+  } on StorageException catch (_) {
+    throw StorageException(
+        "The size of image profile should be less than 200 KB");
   } catch (error) {
-    throw FormatException("Error with init upload image");
+    throw FormatException(error.toString());
   }
 }
 
@@ -83,7 +81,7 @@ Future<String> uploadImageProfile({
 
 Future<String> uploadCVProfile({
   required String bucket,
-  required String folder,
+  String? folder,
   required Uint8List cvBinary,
   required String userID,
 }) async {
@@ -97,12 +95,13 @@ Future<String> uploadCVProfile({
         list.where((element) => element.name.startsWith(userID)).map((element) {
       return SupabaseIntegration.supabase!.storage
           .from(bucket)
-          .remove(["$folder/${element.name}"]);
+          .remove(["${folder == null ? "" : "$folder/"}${element.name}"]);
     }).toList();
 
     await Future.wait(deleteFutures);
 
-    final String name = '$folder/$userID-$time-cv.pdf';
+    final String name =
+        '${folder == null ? "" : "$folder/"}$userID-$time-cv.pdf';
 
     await SupabaseIntegration.supabase!.storage
         .from(bucket)
@@ -111,34 +110,34 @@ Future<String> uploadCVProfile({
     final result =
         SupabaseIntegration.supabase!.storage.from(bucket).getPublicUrl(name);
     return result;
+  } on StorageException catch (_) {
+    throw StorageException("The size of CV should be less than 1 MB");
   } catch (error) {
-    throw FormatException("Error with init upload CV");
+    throw FormatException(error.toString());
   }
 }
 
 Future<void> forDeleteAllFileProjects({required String id}) async {
   try {
-    final listBucket = ["projects_pdf", "project_images", "projects_logo"];
+    final listBucket = ["presentation", "logo", "project_images"];
 
-    // قم بتخزين جميع Future في قائمة وانتظارهم مرة واحدة في النهاية
     final List<Future> deleteOperations = [];
 
     for (var element in listBucket) {
       final list = await SupabaseIntegration.supabase!.storage
-          .from("projects")
-          .list(path: element, searchOptions: SearchOptions(limit: 100000000));
+          .from(element)
+          .list(path: null, searchOptions: SearchOptions(limit: 100000000));
 
       for (var imagesGet in list) {
         if (imagesGet.name.startsWith(id)) {
           print(imagesGet.name);
           deleteOperations.add(SupabaseIntegration.supabase!.storage
-              .from('projects')
-              .remove(["$element/${imagesGet.name}"]));
+              .from(element)
+              .remove([(imagesGet.name)]));
         }
       }
     }
 
-    // انتظار جميع العمليات لتنفيذها مرة واحدة
     await Future.wait(deleteOperations);
   } catch (error) {
     throw FormatException("There error with delete file for project");

@@ -19,6 +19,8 @@ class CatchTheError {
       return errorAuthException(error: error);
     } else if (error is PostgrestException) {
       return errorPostgrestException(error: error);
+    } else if (error is StorageException) {
+      return errorStorageException(error: error);
     } else if (error is NotFoundException) {
       return errorNotFoundException(error: error);
     } else {
@@ -31,6 +33,19 @@ class CatchTheError {
 Response errorFormatException({required FormatException error}) {
   return ResponseClass()
       .errorResponse(message: "Error", data: error.message.toString());
+}
+
+Response errorStorageException({required StorageException error}) {
+  String message = '';
+  switch (error.message) {
+    case 'The object exceeded the maximum allowed size':
+      message = 'File not allow size';
+      break;
+
+    default:
+      message = error.message;
+  }
+  return ResponseClass().errorResponse(message: "Error", data: message);
 }
 
 Response errorAuthException({required AuthException error}) {

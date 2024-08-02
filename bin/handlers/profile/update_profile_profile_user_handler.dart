@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
 import '../../customize/response.dart';
-import '../../helper/get_data_supabase/profile/get_profile_Supervisor_database.dart';
 import '../../helper/get_data_supabase/profile/get_profile_user_database.dart';
 import '../../helper/token.dart';
 import '../../helper/upload_to_supabase/upload/upload_image.dart';
@@ -33,7 +32,7 @@ updateProfileUserHandler(Request req) async {
     if (body.imageDataBinary != null) {
       tasks.add(uploadImageProfile(
               bucket: 'users',
-              folder: 'images',
+              folder: null,
               userID: user.idDataBase,
               imageBinary: Uint8List.fromList(body.imageDataBinary!))
           .then((url) {
@@ -44,16 +43,21 @@ updateProfileUserHandler(Request req) async {
     if (body.resumeDataBinary != null) {
       tasks.add(uploadCVProfile(
               bucket: 'resume',
-              folder: 'cv',
+              folder: null,
               userID: user.idDataBase,
               cvBinary: Uint8List.fromList(body.resumeDataBinary!))
           .then((url) {
+        print("###$url");
         body.resumeURL = url;
       }));
     }
 
     await Future.wait(tasks);
-
+    await SupabaseIntegration.supabase!
+        .from('user_account')
+        .upsert({"resume": body.resumeURL, "user_id": user.idDataBase})
+        .eq("user_id", user.idDataBase)
+        .select();
     await SupabaseIntegration.supabase
         ?.from('users')
         .update(body.toJsonBasicUpdate())
@@ -61,13 +65,6 @@ updateProfileUserHandler(Request req) async {
         .select()
         .single();
 
-    if (user.roleUser != "user") {
-      final userProfile =
-          await getProfileSupervisorDataBase(id: user.idDataBase);
-
-      return ResponseClass()
-          .succeedResponse(message: "success", data: userProfile.toJson());
-    }
     final userProfile = await getProfileUserDataBase(id: user.idDataBase);
 
     return ResponseClass()

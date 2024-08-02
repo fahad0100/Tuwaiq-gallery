@@ -4,6 +4,7 @@ import '../../customize/response.dart';
 import '../../helper/token.dart';
 import '../../integration/supabase/supabase_integration.dart';
 import '../../models/initial_project_model.dart';
+import '../../models/users/user_details.dart';
 
 createProjectFromSupervisorHandler(Request req) async {
   try {
@@ -11,6 +12,19 @@ createProjectFromSupervisorHandler(Request req) async {
         InitialProjectModel.fromJson(json.decode(await req.readAsString()));
     final userToken = await getTokenFromHeader(req: req);
     body.adminId = userToken.idDataBase;
+    final userFound = await SupabaseIntegration.supabase
+        ?.from('users')
+        .select("*")
+        .eq("id", body.userId!)
+        .maybeSingle();
+    if (userFound == null) {
+      throw FormatException(
+          "You tried to create a project for a user not found.");
+    }
+    UserDetails user = UserDetails.fromJson(userFound);
+    if (user.role != "user" && userToken.roleUser == "supervisor") {
+      throw FormatException("Only create a project for a user");
+    }
     final projectInit = await SupabaseIntegration.supabase
         ?.from('projects')
         .insert(body.toJson())
