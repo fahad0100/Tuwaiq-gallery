@@ -27,7 +27,8 @@ Future<ProjectModel> checkBeforeEditProject({
     case "admin":
       break;
     case "supervisor":
-      if (tokenData.idDataBase != body.adminId) {
+      if (tokenData.idDataBase != body.adminId &&
+          tokenData.idDataBase != body.userId) {
         throw FormatException(
             "You are not his supervisor and therefore not allowed to edit this project.");
       }

@@ -20,13 +20,22 @@ Future<List<ProjectsDetails>> fetchProjectsWithParm(
         .range(rangeFrom, rangeTo)
         .order("create_at");
   } else {
-    print("=1=1=1=11=1=11=1");
+    String query = '$columnSearch.ilike.%$valueSearch%';
+    switch (columnSearch) {
+      case 'rating':
+        query = '$columnSearch.eq.$valueSearch';
+        break;
+      default:
+        query = '$columnSearch.ilike.%$valueSearch%';
+    }
+
     projectsDataBase = await SupabaseIntegration.supabase!
         .from("projects")
         .select(
             "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
         .eq("is_public", true)
-        .ilike(columnSearch, '%$valueSearch%')
+        // .ilike(columnSearch, '%$valueSearch%')
+        .or(query)
         .range(rangeFrom, rangeTo)
         .order("create_at");
   }
