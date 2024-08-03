@@ -15,7 +15,7 @@ class MainRoute {
       ..mount('/supervisor', SupervisorRoute().route.call)
       ..mount('/user', UserRoute().route.call)
       ..get('/get/project/<id>', getProjectByIDHandler)
-      ..get('/search/projects', searchProjectHandler);
+      ..get('/projects', searchProjectHandler);
 
     return router;
   }
