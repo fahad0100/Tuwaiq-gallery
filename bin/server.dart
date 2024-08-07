@@ -14,51 +14,60 @@ import 'package:shelf_hotreload/shelf_hotreload.dart';
 
 void main(List<String> args) async {
   // withHotreload(
-  //   () => createServer(),
-  //   onReloaded: () => print('Reload!'),
-  //   onHotReloadNotAvailable: () => print('No hot-reload :('),
-  //   onHotReloadAvailable: () => print('Yay! Hot-reload :)'),
+  //   () => _createServer(),
+  //   onReloaded: () => print('Reloaded!'),
+  //   onHotReloadNotAvailable: () => print('Hot-reload not available :('),
+  //   onHotReloadAvailable: () => print('Hot-reload available :)'),
   //   onHotReloadLog: (log) => print('Reload Log: ${log.message}'),
   //   logLevel: Level.INFO,
   // );
-  await createServer();
+
+  await _createServer();
 }
 
-FutureOr<HttpServer> createServer() async {
+FutureOr<HttpServer> _createServer() async {
   await SupabaseIntegration().supabaseInit();
 
   final ip = InternetAddress.anyIPv4;
   const int maxContentLength = 7 * 1024 * 1024;
-  print(maxContentLength);
 
-  final overrideHeaders = {
+  final headers = {
     ACCESS_CONTROL_ALLOW_ORIGIN: 'https://tuwaiq-gallery.onrender.com',
     'Content-Type': 'application/json;charset=utf-8',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-    'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token'
+    'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-XSS-Protection': '1; mode=block',
+    'Content-Security-Policy':
+        "default-src 'self'; img-src 'self' https://trusted.com; script-src 'self' 'unsafe-inline';",
   };
 
   final memoryStorage = MemStorage();
   final rateLimiter = ShelfRateLimiter(
-      storage: memoryStorage, duration: Duration(seconds: 60), maxRequests: 10);
+    storage: memoryStorage,
+    duration: Duration(seconds: 60),
+    maxRequests: 10,
+  );
 
   final handler = Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware(logRequestSizeMiddleware())
+      .addMiddleware(_logRequestSizeMiddleware())
       .addMiddleware(rateLimiter.rateLimiter())
       .addMiddleware(
           maxContentLengthValidator(maxContentLength: maxContentLength))
-      .addMiddleware(corsHeaders(headers: overrideHeaders))
+      .addMiddleware(corsHeaders(headers: headers))
       .addMiddleware(_securityHeadersMiddleware())
       .addMiddleware(helmet())
+      .addMiddleware(_modifyHeadersMiddleware())
       .addHandler(VersionRoute().route.call);
 
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
   final server = await serve(handler, ip, port);
   server.autoCompress = true;
 
-  print(
-      'Server listening on port http://${server.address.host}:${server.port}');
+  print('Server listening on http://${server.address.host}:${server.port}');
 
   return server;
 }
@@ -81,32 +90,39 @@ Middleware _securityHeadersMiddleware() {
             "default-src 'self'; script-src 'self'; object-src 'none';",
         'Cross-Origin-Opener-Policy': 'same-origin',
         'Cross-Origin-Resource-Policy': 'same-origin',
-        'X-Powered-By': "self"
+        'X-Powered-By': "self",
       });
     };
   };
 }
 
-//?
-
-Middleware logRequestSizeMiddleware() {
+Middleware _logRequestSizeMiddleware() {
   return (Handler handler) {
     return (Request request) async {
-      var requestSize = 0;
-
-      // If the request has a content length, use it
-      if (request.contentLength != null) {
-        requestSize = request.contentLength!;
-      } else {
-        // If there's no content length, read the body to determine the size
-        final body = await request.readAsString();
-        requestSize = utf8.encode(body).length;
-      }
-
+      int requestSize = request.contentLength ??
+          await request.readAsString().then((body) => utf8.encode(body).length);
       final requestSizeInMB = requestSize / (1024 * 1024);
-      print('Request size: ${requestSizeInMB.toStringAsFixed(2)} MB');
-
+      print("Request size: $requestSizeInMB MB");
       return handler(request);
+    };
+  };
+}
+
+Middleware _modifyHeadersMiddleware() {
+  return (Handler innerHandler) {
+    return (Request request) async {
+      final response = await innerHandler(request);
+      final modifiedHeaders = Map<String, String>.from(response.headers)
+        ..remove('Server')
+        ..remove('X-Powered-By')
+        ..addAll({
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '1; mode=block',
+          'Content-Security-Policy': "default-src 'self';",
+        });
+      return response.change(headers: modifiedHeaders);
     };
   };
 }

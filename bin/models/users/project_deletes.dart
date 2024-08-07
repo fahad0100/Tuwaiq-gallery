@@ -228,7 +228,6 @@ class UserAccount {
     data['resume'] = resume;
     data['bindlink'] = bindlink;
     data.removeWhere((key, value) => value == null);
-    print(data);
     return data;
   }
 
@@ -241,7 +240,6 @@ class UserAccount {
     data['resume'] = resume;
     data['bindlink'] = bindlink != null ? 'https://bind.link/$bindlink' : null;
     data.removeWhere((key, value) => value == null);
-    print(data);
     return data;
   }
 }

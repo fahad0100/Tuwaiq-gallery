@@ -15,7 +15,6 @@ Future<UserDetails> getProfileUserDataBase({required String id}) async {
             "*,images_project(*),links_project(*),members_project(*,users(*,user_account(*)))")
         .or('user_id.eq.$id,admin_id.eq.$id');
     userProfile?["projects"] = project;
-    print(userProfile);
     return UserDetails.fromJson(userProfile!);
   } catch (error) {
     throw FormatException(error.toString());

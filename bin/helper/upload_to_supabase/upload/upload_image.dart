@@ -130,7 +130,6 @@ Future<void> forDeleteAllFileProjects({required String id}) async {
 
       for (var imagesGet in list) {
         if (imagesGet.name.startsWith(id)) {
-          print(imagesGet.name);
           deleteOperations.add(SupabaseIntegration.supabase!.storage
               .from(element)
               .remove([(imagesGet.name)]));

@@ -47,7 +47,6 @@ updateProfileUserHandler(Request req) async {
               userID: user.idDataBase,
               cvBinary: Uint8List.fromList(body.resumeDataBinary!))
           .then((url) {
-        print("###$url");
         body.resumeURL = url;
       }));
     }
