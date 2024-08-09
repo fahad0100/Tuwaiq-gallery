@@ -6,11 +6,14 @@ import '../../../helper/get_data_supabase/get_projects_for_owner.dart';
 import '../../../helper/token.dart';
 import '../../../helper/upload_to_supabase/upload_projects/upload_logo_project.dart';
 import '../../../helper/upload_to_supabase/upload_projects/upload_presentation_project.dart';
+import '../../../helper/validations/validations.dart';
 import '../../../integration/supabase/supabase_integration.dart';
 import '../../../models/project_model.dart';
 
 Future<Response> editBaseProjectUserHandler(Request req, String id) async {
   try {
+    Validation.isValidPrefixedUuid(
+        prefix: 'p-', value: id, title: "ID project");
     ProjectModel body = ProjectModel.fromJsonBaseRequestEdit(
         json.decode(await req.readAsString()));
     final userToken = await getTokenFromHeader(req: req);

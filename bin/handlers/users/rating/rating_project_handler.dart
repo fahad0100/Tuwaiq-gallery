@@ -5,11 +5,14 @@ import '../../../customize/exception.dart';
 import '../../../customize/response.dart';
 import '../../../helper/get_data_supabase/get_rating.dart';
 import '../../../helper/token.dart';
+import '../../../helper/validations/validations.dart';
 import '../../../integration/supabase/supabase_integration.dart';
 import '../../../models/project_evaluation_model.dart';
 
 Future<Response> ratingProjectHandler(Request req, String id) async {
   try {
+    Validation.isValidPrefixedUuid(
+        prefix: 'p-', value: id, title: "ID project");
     final body =
         ProjectEvaluation.fromJson(json.decode(await req.readAsString()));
 

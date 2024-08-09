@@ -1,6 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import '../handlers/profile/profile_user_handler.dart';
+import '../handlers/users/dashbord/calclater.dart';
 import '../handlers/users/update_project/update_base_projects_user_handler.dart';
 import '../handlers/users/update_project/update_logo_projects_user_handler.dart';
 import '../handlers/users/update_project/update_presentation_projects_user_handler.dart';
@@ -23,7 +24,8 @@ class UserRoute {
       ..put('/edit/project/images/<id>', editImagesProjectUserHandler)
       ..put('/edit/project/link/<id>', editLinkProjectUserHandler)
       ..put('/edit/project/members/<id>', editMembersProjectUserHandler)
-      ..post('/rating/project/<id>', ratingProjectHandler);
+      ..post('/rating/project/<id>', ratingProjectHandler)
+      ..get('/calculateHandler/<id>', calculateHandler);
 
     final handler =
         Pipeline().addMiddleware(userMiddleware).addHandler(router.call);
