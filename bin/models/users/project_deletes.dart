@@ -234,7 +234,7 @@ class UserAccount {
     final data = <String, dynamic>{};
 
     data['github'] = github;
-    data['linkedin'] = linkedin != linkedin;
+    data['linkedin'] = linkedin;
     data['resume'] = resume;
     data['bindlink'] = bindlink;
     data.removeWhere((key, value) => value == null);
