@@ -208,11 +208,11 @@ class UserAccount {
   UserAccount.fromJsonRequest(Map<String, dynamic> json) {
     resume = json['resume'];
     bindlink = Validation.isValidUsername(
-        value: json['bindlink'], title: "Bindlink username");
+        value: json['bindlink'], title: "Bindlink username", isOption: true);
     linkedin = Validation.isValidUsername(
-        value: json['linkedin'], title: "Linkedin username");
+        value: json['linkedin'], title: "Linkedin username", isOption: true);
     github = Validation.isValidUsername(
-        value: json['github'], title: "Github username");
+        value: json['github'], title: "Github username", isOption: true);
   }
   UserAccount.fromJsonDataBase(Map<String, dynamic> json) {
     resume = json['resume'];
@@ -227,18 +227,16 @@ class UserAccount {
     data['linkedin'] = linkedin;
     data['resume'] = resume;
     data['bindlink'] = bindlink;
-    data.removeWhere((key, value) => value == null);
     return data;
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
 
-    data['github'] = github != null ? "https://github.com/$github" : null;
-    data['linkedin'] =
-        linkedin != null ? "https://www.linkedin.com/in/$linkedin/" : null;
+    data['github'] = github;
+    data['linkedin'] = linkedin != linkedin;
     data['resume'] = resume;
-    data['bindlink'] = bindlink != null ? 'https://bind.link/$bindlink' : null;
+    data['bindlink'] = bindlink;
     data.removeWhere((key, value) => value == null);
     return data;
   }

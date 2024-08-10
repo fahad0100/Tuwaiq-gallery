@@ -49,7 +49,7 @@ class UpdateProfileModel {
     final data = <String, dynamic>{};
 
     data['accounts'] = accounts?.toJsonDataBase();
-    data.removeWhere((key, value) => value == null);
+
     return data;
   }
 }
