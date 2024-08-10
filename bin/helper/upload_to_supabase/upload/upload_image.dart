@@ -71,7 +71,7 @@ Future<String> uploadImageProfile({
     return result;
   } on StorageException catch (_) {
     throw StorageException(
-        "The size of image profile should be less than 200 KB");
+        "The size of image profile should be less than 500 KB");
   } catch (error) {
     throw FormatException(error.toString());
   }

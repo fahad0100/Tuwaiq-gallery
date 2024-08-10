@@ -52,11 +52,14 @@ updateProfileUserHandler(Request req) async {
     }
 
     await Future.wait(tasks);
-    await SupabaseIntegration.supabase!
-        .from('user_account')
-        .upsert({"resume": body.resumeURL, "user_id": user.idDataBase})
-        .eq("user_id", user.idDataBase)
-        .select();
+    if (body.resumeURL != null) {
+      await SupabaseIntegration.supabase!
+          .from('user_account')
+          .upsert({"resume": body.resumeURL, "user_id": user.idDataBase})
+          .eq("user_id", user.idDataBase)
+          .select();
+    }
+
     await SupabaseIntegration.supabase
         ?.from('users')
         .update(body.toJsonBasicUpdate())

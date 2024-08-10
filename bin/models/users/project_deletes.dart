@@ -227,6 +227,9 @@ class UserAccount {
     data['linkedin'] = linkedin;
     data['resume'] = resume;
     data['bindlink'] = bindlink;
+    if (data[resume] == null) {
+      data.remove('resume');
+    }
     return data;
   }
 
