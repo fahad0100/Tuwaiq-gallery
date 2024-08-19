@@ -41,7 +41,7 @@ class UpdateProfileModel {
     data['l_name'] = lName;
     data['image'] = imageURL;
 
-    data.removeWhere((key, value) => value == null);
+    data.removeWhere((key, value) => value == null || value.toString().isEmpty);
     return data;
   }
 

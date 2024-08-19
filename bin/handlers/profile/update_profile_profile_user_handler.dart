@@ -60,12 +60,14 @@ updateProfileUserHandler(Request req) async {
           .select();
     }
 
-    await SupabaseIntegration.supabase
-        ?.from('users')
-        .update(body.toJsonBasicUpdate())
-        .eq("id", user.idDataBase)
-        .select()
-        .single();
+    if (body.toJsonBasicUpdate().isNotEmpty) {
+      await SupabaseIntegration.supabase
+          ?.from('users')
+          .update(body.toJsonBasicUpdate())
+          .eq("id", user.idDataBase)
+          .select()
+          .single();
+    }
 
     final userProfile = await getProfileUserDataBase(id: user.idDataBase);
 
