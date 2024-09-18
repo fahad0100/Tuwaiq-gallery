@@ -69,9 +69,8 @@ Future<String> uploadImageProfile({
     final result =
         SupabaseIntegration.supabase!.storage.from(bucket).getPublicUrl(name);
     return result;
-  } on StorageException catch (_) {
-    throw StorageException(
-        "The size of image profile should be less than 500 KB");
+  } on StorageException catch (error) {
+    throw StorageException(error.message);
   } catch (error) {
     throw FormatException(error.toString());
   }

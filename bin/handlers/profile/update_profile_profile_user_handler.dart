@@ -15,6 +15,9 @@ updateProfileUserHandler(Request req) async {
     final body = UpdateProfileModel.fromJson(bodyJson);
     final user = await getTokenFromHeader(req: req);
 
+    print(body.toJsonBasicUpdate());
+    print(body.toJsonAccountUpdate());
+
     final List<Future> tasks = [];
 
     if (body.accounts != null) {
